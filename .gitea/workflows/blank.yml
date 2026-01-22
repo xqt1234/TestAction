@@ -15,32 +15,37 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
   build:
-    # The type of runner that the job will run on
     runs-on: ubuntu-xiong
     strategy:
       matrix:
         build-type: [Debug, Release]
-    # Steps represent a sequence of tasks that will be executed as part of the job
+
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: 检出代码
         uses: http://192.168.105.4:3000/xqt1234/checkout.git@v4
-        # with:
-        #     submodules: recursive
 
-      # Runs a single command using the runners shell
-      - name: 设置环境
-        run: sudo apt-get install -y cmake g++ libgtest-dev clang-format valgrind clang-tidy
+      - name: 安装依赖
+        run: sudo apt-get install -y cmake g++ ccache libgtest-dev clang-format valgrind clang-tidy
 
-      # Runs a set of commands using the runners shell
+      - name: 缓存 ccache
+        uses: actions/cache@v4
+        with:
+          path: ~/.ccache
+          key: ccache-${{ runner.os }}-${{ hashFiles('**/*.cpp', '**/*.hpp', '**/CMakeLists.txt') }}
+          restore-keys: |
+            ccache-${{ runner.os }}-
+
       - name: 编译
         run: |
-          mkdir build && cd build
-          cmake ../ && make -j4
+          cmake -S . -B build \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+          cmake --build build -j$(nproc)
+
       - name: 运行测试
-        run: bin/tests.bin --gtest_output=xml:test_results_${{ matrix.build-type }}.xml
+        run: build/bin/tests.bin --gtest_output=xml:test_results_${{ matrix.build-type }}.xml
       - name: 内存泄漏检查
         run: |
           valgrind --leak-check=full --error-exitcode=1 ./bin/tests.bin
