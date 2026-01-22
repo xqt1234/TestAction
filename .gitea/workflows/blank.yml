@@ -38,14 +38,15 @@ jobs:
 
       - name: 编译
         run: |
-          cmake -S . -B build \
+          mkdir -p build && cd build
+          cmake .. \
             -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
             -DCMAKE_C_COMPILER_LAUNCHER=ccache \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
-          cmake --build build -j$(nproc)
-
+          make -j$(nproc)
+          cd ..
       - name: 运行测试
-        run: /bin/tests.bin --gtest_output=xml:test_results_${{ matrix.build-type }}.xml
+        run: ./bin/tests.bin --gtest_output=xml:test_results_${{ matrix.build-type }}.xml
       - name: 内存泄漏检查
         run: |
           valgrind --leak-check=full --error-exitcode=1 ./bin/tests.bin
