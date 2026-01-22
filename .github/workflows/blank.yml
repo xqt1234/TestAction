@@ -32,7 +32,7 @@ jobs:
 
       # Runs a single command using the runners shell
       - name: 缓存 ccache
-        uses: actions/cache.git@v4
+        uses: actions/cache@v4
         with:
           path: ~/.ccache
           key: ccache-${{ runner.os }}-${{ hashFiles('**/*.cpp', '**/*.hpp', '**/CMakeLists.txt') }}
