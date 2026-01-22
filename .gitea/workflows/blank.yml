@@ -28,7 +28,7 @@ jobs:
       - name: 安装依赖
         run: sudo apt-get install -y cmake g++ ccache libgtest-dev clang-format valgrind clang-tidy
 
-      - name: 缓存 ccache
+      - name: 缓存 ccache111
         uses: actions/cache@v4
         with:
           path: ~/.ccache
