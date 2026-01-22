@@ -31,14 +31,26 @@ jobs:
         #     submodules: recursive
 
       # Runs a single command using the runners shell
+      - name: 缓存 ccache
+        uses: actions/cache.git@v4
+        with:
+          path: ~/.ccache
+          key: ccache-${{ runner.os }}-${{ hashFiles('**/*.cpp', '**/*.hpp', '**/CMakeLists.txt') }}
+          restore-keys: |
+            ccache-${{ runner.os }}-
       - name: 设置环境
         run: sudo apt-get install -y cmake g++ libgtest-dev clang-format valgrind clang-tidy
 
       # Runs a set of commands using the runners shell
       - name: 编译
         run: |
-          mkdir build && cd build
-          cmake ../ && make -j4
+          mkdir -p build && cd build
+          cmake .. \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+          make -j$(nproc)
+          cd ..
       - name: 运行测试
         run: bin/tests.bin --gtest_output=xml:test_results_${{ matrix.build-type }}.xml
       - name: 内存泄漏检查
