@@ -81,6 +81,7 @@ TEST_F(vectorTest, 移除某个位置元素)
     EXPECT_EQ(v1[1], 3);
     EXPECT_EQ(v1.size(), 4);
     EXPECT_EQ(v1[2], 4);
+    EXPECT_EQ(v1[3], 5);
 }
 
 TEST_F(vectorTest, 获取元素)
