@@ -1,0 +1,56 @@
+# This is a basic workflow to help you get started with Actions
+
+name: 最小CI
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        build-type: [Debug, Release]
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: 检出代码
+        uses: actions/checkout@v5
+        # with:
+        #     submodules: recursive
+
+      # Runs a single command using the runners shell
+      - name: 设置环境
+        run: sudo apt-get install -y cmake g++ libgtest-dev clang-format valgrind clang-tidy
+
+      # Runs a set of commands using the runners shell
+      - name: 编译
+        run: |
+          mkdir build && cd build
+          cmake ../ && make -j4
+      - name: 运行测试
+        run: bin/tests.bin --gtest_output=xml:test_results_${{ matrix.build-type }}.xml
+      - name: 内存泄漏检查
+        run: |
+          valgrind --leak-check=full --error-exitcode=1 ./bin/tests.bin
+      - name: 代码格式检查
+        run: |
+           find include tests -name "*.hpp" -o -name "*.cpp" | xargs clang-format --dry-run -n --Werror
+           echo "检查完成"
+      - name: 静态分析
+        run: |
+          find include tests \( -name "*.cpp" -o -name "*.hpp" \) | xargs -I {} clang-tidy \
+          --config-file=.clang-tidy \
+          {} \
+          -- -Iinclude -std=c++20
