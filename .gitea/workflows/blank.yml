@@ -29,7 +29,7 @@ jobs:
         run: sudo apt-get install -y cmake g++ ccache libgtest-dev clang-format valgrind clang-tidy
 
       - name: 缓存 ccache111
-        uses: actions/cache@v4
+        uses: http://192.168.105.4:3000/xqt1234/cache.git
         with:
           path: ~/.ccache
           key: ccache-${{ runner.os }}-${{ hashFiles('**/*.cpp', '**/*.hpp', '**/CMakeLists.txt') }}
