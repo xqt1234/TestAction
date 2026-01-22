@@ -28,7 +28,7 @@ jobs:
       - name: 安装依赖
         run: sudo apt-get install -y cmake g++ ccache libgtest-dev clang-format valgrind clang-tidy
 
-      - name: 缓存 ccache111
+      - name: 缓存 ccache
         uses: http://192.168.105.4:3000/xqt1234/cache.git@v4
         with:
           path: ~/.ccache
