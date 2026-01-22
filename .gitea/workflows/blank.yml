@@ -45,7 +45,7 @@ jobs:
           cmake --build build -j$(nproc)
 
       - name: 运行测试
-        run: build/bin/tests.bin --gtest_output=xml:test_results_${{ matrix.build-type }}.xml
+        run: /bin/tests.bin --gtest_output=xml:test_results_${{ matrix.build-type }}.xml
       - name: 内存泄漏检查
         run: |
           valgrind --leak-check=full --error-exitcode=1 ./bin/tests.bin
